@@ -2,7 +2,6 @@ package observe
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -37,7 +36,6 @@ func NewLivecoinClient(apiHost string) *LivecoinClient {
 }
 
 func (l *LivecoinClient) GetMaxBidMinAsk(pair string) (CurrencyPair, error) {
-	fmt.Println(l.ApiHost)
 	u, err := url.Parse(l.ApiHost + LiveCoinRouteMaxBidMinAsk)
 	if err != nil {
 		return CurrencyPair{}, err
