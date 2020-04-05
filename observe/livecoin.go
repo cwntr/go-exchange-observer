@@ -45,7 +45,6 @@ func (l *LivecoinClient) GetMaxBidMinAsk(pair string) (CurrencyPair, error) {
 	q := u.Query()
 	q.Set(LiveCoinQueryParamCurrencyPair, pair)
 	u.RawQuery = q.Encode()
-	fmt.Println(u.String())
 	var p Pair
 	err = l.getJson(u.String(), &p)
 	if err != nil {
@@ -55,7 +54,6 @@ func (l *LivecoinClient) GetMaxBidMinAsk(pair string) (CurrencyPair, error) {
 }
 
 func (l *LivecoinClient) getJson(url string, target interface{}) error {
-	fmt.Println(url)
 	r, err := l.Client.Get(url)
 	if err != nil {
 		return err
