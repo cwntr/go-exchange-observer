@@ -2,7 +2,9 @@ package observe
 
 import (
 	"fmt"
+	"github.com/cwntr/go-stakenet/explorer"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -53,16 +55,35 @@ func InitClients(binanceKey string, binanceSecret string) (err error) {
 func GetPrices() ([]PricePair, []Currency, error) {
 	var p []PricePair
 	var c []Currency
+	var xsnBTC float64
 	cp, err := O.LivecoinClient.GetMaxBidMinAsk(LiveCoinPairXSNBTC)
 	if err != nil {
-		return p, c, err
-	}
+		//if Livecoin failed, try the CMC based price from XSN explorer
+		api := explorer.NewXSNExplorerAPIClient(nil)
+		var xsnPrice float64
+		var btcPrice float64
 
-	xsnBTC, err := strconv.ParseFloat(cp.MaxBid, 64)
-	if err != nil {
-		return p, c, err
+		coins := []string{"XSN", "BTC"}
+		for _, coin := range coins {
+			price, err := api.GetPrices(strings.ToLower(coin))
+			if err != nil {
+				fmt.Println("unable to get coin price from XSN Explorer API")
+				return p, c, err
+			}
+			if strings.ToUpper(coin) == "XSN" {
+				xsnPrice = price.USD
+			}
+			if strings.ToUpper(coin) == "BTC" {
+				btcPrice = price.USD
+			}
+		}
+		xsnBTC = xsnPrice / btcPrice
+	} else {
+		xsnBTC, err = strconv.ParseFloat(cp.MaxBid, 64)
+		if err != nil {
+			return p, c, err
+		}
 	}
-
 	bPairs, err := O.BinanceClient.GetPairs(getActiveBinancePairs())
 	if err != nil {
 		return p, c, err
