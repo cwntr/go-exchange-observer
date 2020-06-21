@@ -11,6 +11,16 @@ const (
 	BinancePairLTCBTC  = "LTCBTC"
 	BinancePairBTCUSDT = "BTCUSDT"
 	BinancePairLTCUSDT = "LTCUSDT"
+	BinancePairETHBTC  = "ETHBTC"
+	BinancePairDCRBTC  = "DCRBTC"
+	BinancePairXLMBTC  = "XLMBTC"
+	BinancePairEOSBTC  = "EOSBTC"
+	BinancePairZECBTC  = "ZECBTC"
+	BinancePairBNBBTC  = "BNBBTC"
+	BinancePairADABTC  = "ADABTC"
+	BinancePairXTZBTC  = "XTZBTC"
+	BinancePairATOMBTC = "ATOMBTC"
+	BinancePairZRXBTC  = "ZRXBTC"
 )
 
 type BinanceClient struct {
@@ -49,5 +59,15 @@ func getActiveBinancePairs() []string {
 		BinancePairLTCBTC,
 		BinancePairBTCUSDT,
 		BinancePairLTCUSDT,
+		BinancePairETHBTC,
+		BinancePairDCRBTC,
+		BinancePairXLMBTC,
+		BinancePairEOSBTC,
+		BinancePairZECBTC,
+		BinancePairBNBBTC,
+		BinancePairADABTC,
+		BinancePairXTZBTC,
+		BinancePairATOMBTC,
+		BinancePairZRXBTC,
 	}
 }
