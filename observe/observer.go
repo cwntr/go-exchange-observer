@@ -128,6 +128,7 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	var ATOMinUSD, ATOMinBTC float64
 	var ZRXinUSD, ZRXinBTC float64
 
+	// set BTC USD first, since its mandatory for converting other coins
 	for _, pair := range bPairs {
 		if pair.Symbol == BinancePairBTCUSDT {
 			BTCinUSD, err = strconv.ParseFloat(pair.Price, 64)
@@ -137,7 +138,11 @@ func GetPrices() ([]PricePair, []Currency, error) {
 			}
 			XSNinUSD = BTCinUSD / (1 / xsnBTC)
 			XSNinBTC = xsnBTC
-		} else if pair.Symbol == BinancePairLTCBTC {
+		}
+	}
+
+	for _, pair := range bPairs {
+		if pair.Symbol == BinancePairLTCBTC {
 			LTCinBTC, err = strconv.ParseFloat(pair.Price, 64)
 			if err != nil {
 				fmt.Printf("err parsing BinancePairLTCBTC: %v", err)
