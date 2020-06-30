@@ -66,6 +66,7 @@ func InitClients(binanceKey string, binanceSecret string) (err error) {
 	o := Observer{}
 	o.BinanceClient, err = NewBinanceClient(binanceKey, binanceSecret)
 	if err != nil {
+		fmt.Printf("err while initializing o.BinanceClient: %v", err)
 		return err
 	}
 	o.LivecoinClient = NewLivecoinClient(LiveCoinHost)
@@ -102,11 +103,13 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	} else {
 		xsnBTC, err = strconv.ParseFloat(cp.MaxBid, 64)
 		if err != nil {
-			return p, c, err
+			fmt.Printf("err while O.BinanceClient.GetPairs: %v", err)
+			//return p, c, err
 		}
 	}
 	bPairs, err := O.BinanceClient.GetPairs(getActiveBinancePairs())
 	if err != nil {
+		fmt.Printf("err while O.BinanceClient.GetPairs: %v", err)
 		return p, c, err
 	}
 
