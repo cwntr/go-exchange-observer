@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	BinancePairXSNUSDT = "XSNUSD"
 	BinancePairLTCBTC  = "LTCBTC"
 	BinancePairBTCUSDT = "BTCUSDT"
 	BinancePairLTCUSDT = "LTCUSDT"

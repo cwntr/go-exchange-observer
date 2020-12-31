@@ -2,11 +2,9 @@ package observe
 
 import (
 	"fmt"
+	"github.com/shopspring/decimal"
 	"strconv"
-	"strings"
 	"time"
-
-	"github.com/cwntr/go-stakenet/explorer"
 )
 
 const (
@@ -39,20 +37,22 @@ const (
 	CurrencyZRX  = "ZRX"
 
 	SourceBinance  = "Binance"
-	SourceLivecoin = "Livecoin"
+	SourceWhitebit = "Whitebit"
 )
 
 var O Observer
 
 type Observer struct {
 	*BinanceClient
-	*LivecoinClient
+	*WhitebitClient
 	Ticker time.Duration
 }
 
 type PricePair struct {
 	Pair    string
 	Price   float64
+	Bid     float64
+	Ask     float64
 	Sources []string
 }
 
@@ -69,7 +69,7 @@ func InitClients(binanceKey string, binanceSecret string) (err error) {
 		fmt.Printf("err while initializing o.BinanceClient: %v", err)
 		return err
 	}
-	o.LivecoinClient = NewLivecoinClient(LiveCoinHost)
+	o.WhitebitClient = NewWhitebitClient(WhiteBitHost)
 	O = o
 	return nil
 }
@@ -77,36 +77,24 @@ func InitClients(binanceKey string, binanceSecret string) (err error) {
 func GetPrices() ([]PricePair, []Currency, error) {
 	var p []PricePair
 	var c []Currency
-	var xsnBTC float64
-	cp, err := O.LivecoinClient.GetMaxBidMinAsk(LiveCoinPairXSNBTC)
-	if err != nil {
-		//if Livecoin failed, try the CMC based price from XSN explorer
-		api := explorer.NewXSNExplorerAPIClient(nil)
-		var xsnPrice float64
-		var btcPrice float64
 
-		coins := []string{"XSN", "BTC"}
-		for _, coin := range coins {
-			price, err := api.GetPrices(strings.ToLower(coin))
-			if err != nil {
-				fmt.Println("unable to get coin price from XSN Explorer API")
-				return p, c, err
-			}
-			if strings.ToUpper(coin) == "XSN" {
-				xsnPrice = price.USD
-			}
-			if strings.ToUpper(coin) == "BTC" {
-				btcPrice = price.USD
-			}
-		}
-		xsnBTC = xsnPrice / btcPrice
-	} else {
-		xsnBTC, err = strconv.ParseFloat(cp.MaxBid, 64)
-		if err != nil {
-			fmt.Printf("err while O.BinanceClient.GetPairs: %v", err)
-			//return p, c, err
-		}
+	wbTicker, err := O.WhitebitClient.GetTicker()
+	if err != nil {
+		fmt.Printf("err while O.WhitebitClient.GetTicker(): %v", err)
+		return p, c, err
 	}
+
+	askXSNUSDT, err := decimal.NewFromString(wbTicker.Result.XSNUSDT.Ticker.Ask)
+	bidXSNUSDT, err := decimal.NewFromString(wbTicker.Result.XSNUSDT.Ticker.Bid)
+
+	askBTCUSDT, err := decimal.NewFromString(wbTicker.Result.BTCUSDT.Ticker.Ask)
+	bidBTCUSDT, err := decimal.NewFromString(wbTicker.Result.BTCUSDT.Ticker.Bid)
+	if err != nil {
+		fmt.Printf("err decimal.NewFromString: %v", err)
+		return p, c, err
+	}
+
+	//Binance
 	bPairs, err := O.BinanceClient.GetPairs(getActiveBinancePairs())
 	if err != nil {
 		fmt.Printf("err while O.BinanceClient.GetPairs: %v", err)
@@ -117,7 +105,8 @@ func GetPrices() ([]PricePair, []Currency, error) {
 
 	var XSNinUSD float64
 	var XSNinBTC float64
-	var XSNinLTC float64
+	var XSNAskInBTC, _ = askXSNUSDT.Div(askBTCUSDT).Round(8).Float64()
+	var XSNBidInBTC, _ = bidXSNUSDT.Div(bidBTCUSDT).Round(8).Float64()
 
 	var LTCinUSD, LTCinBTC float64
 	var ETHinUSD, ETHinBTC float64
@@ -139,10 +128,12 @@ func GetPrices() ([]PricePair, []Currency, error) {
 				fmt.Printf("err parsing BinancePairBTCUSDT: %v", err)
 				continue
 			}
-			XSNinUSD = BTCinUSD / (1 / xsnBTC)
-			XSNinBTC = xsnBTC
 		}
 	}
+
+	//ask is market price
+	XSNinUSD = BTCinUSD / (1 / XSNAskInBTC)
+	XSNinBTC = XSNAskInBTC
 
 	for _, pair := range bPairs {
 		if pair.Symbol == BinancePairLTCBTC {
@@ -230,20 +221,18 @@ func GetPrices() ([]PricePair, []Currency, error) {
 		}
 	}
 
-	XSNinLTC = xsnBTC / LTCinBTC
-	p = append(p, PricePair{Pair: PairXSNBTC, Price: XSNinBTC, Sources: []string{SourceLivecoin}})
-	p = append(p, PricePair{Pair: PairXSNLTC, Price: XSNinLTC, Sources: []string{SourceLivecoin, SourceBinance}})
-	p = append(p, PricePair{Pair: PairLTCBTC, Price: LTCinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairETHBTC, Price: ETHinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairDCRBTC, Price: DCRinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairXLMBTC, Price: XLMinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairEOSBTC, Price: EOSinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairZECBTC, Price: ZECinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairBNBBTC, Price: BNBinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairADABTC, Price: ADAinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairXTZBTC, Price: XTZinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairATOMBTC, Price: ATOMinBTC, Sources: []string{SourceBinance}})
-	p = append(p, PricePair{Pair: PairZRXBTC, Price: ZRXinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairXSNBTC, Price: XSNinBTC, Ask: XSNAskInBTC, Bid: XSNBidInBTC, Sources: []string{SourceWhitebit}})
+	p = append(p, PricePair{Pair: PairLTCBTC, Price: LTCinBTC, Ask: LTCinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairETHBTC, Price: ETHinBTC, Ask: ETHinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairDCRBTC, Price: DCRinBTC, Ask: DCRinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairXLMBTC, Price: XLMinBTC, Ask: XLMinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairEOSBTC, Price: EOSinBTC, Ask: EOSinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairZECBTC, Price: ZECinBTC, Ask: ZECinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairBNBBTC, Price: BNBinBTC, Ask: BNBinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairADABTC, Price: ADAinBTC, Ask: ADAinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairXTZBTC, Price: XTZinBTC, Ask: XTZinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairATOMBTC, Price: ATOMinBTC, Ask: ATOMinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairZRXBTC, Price: ZRXinBTC, Ask: ZRXinBTC, Sources: []string{SourceBinance}})
 
 	c = append(c, Currency{Symbol: CurrencyBTC, PriceUSD: BTCinUSD, PriceBTC: float64(1)})
 	c = append(c, Currency{Symbol: CurrencyLTC, PriceUSD: LTCinUSD, PriceBTC: LTCinBTC})
