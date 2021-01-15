@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	BinancePairXSNUSDT = "XSNUSD"
 	BinancePairLTCBTC  = "LTCBTC"
 	BinancePairBTCUSDT = "BTCUSDT"
 	BinancePairLTCUSDT = "LTCUSDT"
+	BinancePairETHUSDT = "ETHUSDT"
 	BinancePairETHBTC  = "ETHBTC"
 	BinancePairDCRBTC  = "DCRBTC"
 	BinancePairXLMBTC  = "XLMBTC"
@@ -60,6 +60,7 @@ func getActiveBinancePairs() []string {
 		BinancePairLTCBTC,
 		BinancePairBTCUSDT,
 		BinancePairLTCUSDT,
+		BinancePairETHUSDT,
 		BinancePairETHBTC,
 		BinancePairDCRBTC,
 		BinancePairXLMBTC,

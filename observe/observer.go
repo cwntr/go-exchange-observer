@@ -21,6 +21,8 @@ const (
 	PairXTZBTC  = "XTZ_BTC"
 	PairATOMBTC = "ATOM_BTC"
 	PairZRXBTC  = "ZRX_BTC"
+	PairETHUSDT = "ETH_USDT"
+	PairBTCUSDT = "BTC_USDT"
 
 	CurrencyXSN  = "XSN"
 	CurrencyBTC  = "BTC"
@@ -35,6 +37,7 @@ const (
 	CurrencyXTZ  = "XTZ"
 	CurrencyATOM = "ATOM"
 	CurrencyZRX  = "ZRX"
+	CurrencyUSDT  = "USDT"
 
 	SourceBinance  = "Binance"
 	SourceWhitebit = "Whitebit"
@@ -107,6 +110,7 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	var XSNinBTC float64
 	var XSNAskInBTC, _ = askXSNUSDT.Div(askBTCUSDT).Round(8).Float64()
 	var XSNBidInBTC, _ = bidXSNUSDT.Div(bidBTCUSDT).Round(8).Float64()
+
 
 	var LTCinUSD, LTCinBTC float64
 	var ETHinUSD, ETHinBTC float64
@@ -224,6 +228,8 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	p = append(p, PricePair{Pair: PairXSNBTC, Price: XSNinBTC, Ask: XSNAskInBTC, Bid: XSNBidInBTC, Sources: []string{SourceWhitebit}})
 	p = append(p, PricePair{Pair: PairLTCBTC, Price: LTCinBTC, Ask: LTCinBTC, Sources: []string{SourceBinance}})
 	p = append(p, PricePair{Pair: PairETHBTC, Price: ETHinBTC, Ask: ETHinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairETHUSDT, Price: ETHinUSD, Ask: ETHinUSD, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairBTCUSDT, Price: BTCinUSD, Ask: BTCinUSD, Sources: []string{SourceBinance}})
 	p = append(p, PricePair{Pair: PairDCRBTC, Price: DCRinBTC, Ask: DCRinBTC, Sources: []string{SourceBinance}})
 	p = append(p, PricePair{Pair: PairXLMBTC, Price: XLMinBTC, Ask: XLMinBTC, Sources: []string{SourceBinance}})
 	p = append(p, PricePair{Pair: PairEOSBTC, Price: EOSinBTC, Ask: EOSinBTC, Sources: []string{SourceBinance}})
@@ -235,6 +241,7 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	p = append(p, PricePair{Pair: PairZRXBTC, Price: ZRXinBTC, Ask: ZRXinBTC, Sources: []string{SourceBinance}})
 
 	c = append(c, Currency{Symbol: CurrencyBTC, PriceUSD: BTCinUSD, PriceBTC: float64(1)})
+	c = append(c, Currency{Symbol: CurrencyUSDT, PriceUSD: float64(1), PriceBTC: BTCinUSD})
 	c = append(c, Currency{Symbol: CurrencyLTC, PriceUSD: LTCinUSD, PriceBTC: LTCinBTC})
 	c = append(c, Currency{Symbol: CurrencyXSN, PriceUSD: XSNinUSD, PriceBTC: XSNinBTC})
 	c = append(c, Currency{Symbol: CurrencyETH, PriceUSD: ETHinUSD, PriceBTC: ETHinBTC})
