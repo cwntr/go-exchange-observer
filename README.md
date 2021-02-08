@@ -3,7 +3,7 @@ Observe crypto exchanges to provide price information about trading pairs and cu
 
 ## Exchange price tickers 
 1. Binance (BTC, LTC,..)
-2. Livecoin (XSN)
+2. Whitebit(XSN, ..)
 
 ## Requirements 
 1. Binance needs access token + secret
