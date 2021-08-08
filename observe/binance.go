@@ -12,6 +12,8 @@ const (
 	BinancePairBTCUSDT = "BTCUSDT"
 	BinancePairLTCUSDT = "LTCUSDT"
 	BinancePairETHUSDT = "ETHUSDT"
+	BinancePairETHUSDC = "ETHUSDC"
+	BinancePairBTCUSDC = "BTCUSDC"
 	BinancePairETHBTC  = "ETHBTC"
 	BinancePairDCRBTC  = "DCRBTC"
 	BinancePairXLMBTC  = "XLMBTC"
@@ -59,6 +61,8 @@ func getActiveBinancePairs() []string {
 	return []string{
 		BinancePairLTCBTC,
 		BinancePairBTCUSDT,
+		BinancePairBTCUSDC,
+		BinancePairETHUSDC,
 		BinancePairLTCUSDT,
 		BinancePairETHUSDT,
 		BinancePairETHBTC,
