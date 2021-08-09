@@ -2,9 +2,10 @@ package observe
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
 	"strconv"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -25,8 +26,11 @@ const (
 	PairBTCUSDT = "BTC_USDT"
 	PairETHUSDC = "ETH_USDC"
 	PairBTCUSDC = "BTC_USDC"
+	PairBTCETH  = "BTC_ETH"
+	PairWBTCETH = "WBTC_ETH"
 
 	CurrencyXSN  = "XSN"
+	CurrencyWBTC = "WBTC"
 	CurrencyBTC  = "BTC"
 	CurrencyLTC  = "LTC"
 	CurrencyETH  = "ETH"
@@ -125,6 +129,7 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	var XTZinUSD, XTZinBTC float64
 	var ATOMinUSD, ATOMinBTC float64
 	var ZRXinUSD, ZRXinBTC float64
+	var WBTCinETH float64
 
 	// set BTC USD first, since its mandatory for converting other coins
 	for _, pair := range bPairs {
@@ -147,6 +152,12 @@ func GetPrices() ([]PricePair, []Currency, error) {
 			LTCinBTC, err = strconv.ParseFloat(pair.Price, 64)
 			if err != nil {
 				fmt.Printf("err parsing BinancePairLTCBTC: %v", err)
+				continue
+			}
+		} else if pair.Symbol == BinancePairWBTCETH {
+			WBTCinETH, err = strconv.ParseFloat(pair.Price, 64)
+			if err != nil {
+				fmt.Printf("err parsing BinancePairWBTCETH: %v", err)
 				continue
 			}
 		} else if pair.Symbol == BinancePairLTCUSDT {
@@ -244,6 +255,10 @@ func GetPrices() ([]PricePair, []Currency, error) {
 	p = append(p, PricePair{Pair: PairXTZBTC, Price: XTZinBTC, Ask: XTZinBTC, Sources: []string{SourceBinance}})
 	p = append(p, PricePair{Pair: PairATOMBTC, Price: ATOMinBTC, Ask: ATOMinBTC, Sources: []string{SourceBinance}})
 	p = append(p, PricePair{Pair: PairZRXBTC, Price: ZRXinBTC, Ask: ZRXinBTC, Sources: []string{SourceBinance}})
+	p = append(p, PricePair{Pair: PairWBTCETH, Price: WBTCinETH, Ask: WBTCinETH, Sources: []string{SourceBinance}})
+
+	btcEthPrice := BTCinUSD / ETHinUSD
+	p = append(p, PricePair{Pair: PairBTCETH, Price: btcEthPrice, Ask: btcEthPrice, Sources: []string{SourceBinance}})
 
 	c = append(c, Currency{Symbol: CurrencyBTC, PriceUSD: BTCinUSD, PriceBTC: float64(1)})
 	c = append(c, Currency{Symbol: CurrencyUSDT, PriceUSD: float64(1), PriceBTC: BTCinUSD})

@@ -9,6 +9,7 @@ import (
 
 const (
 	BinancePairLTCBTC  = "LTCBTC"
+	BinancePairWBTCETH = "WBTCETH"
 	BinancePairBTCUSDT = "BTCUSDT"
 	BinancePairLTCUSDT = "LTCUSDT"
 	BinancePairETHUSDT = "ETHUSDT"
@@ -59,6 +60,7 @@ func NewBinanceClient(apiKey string, secret string) (*BinanceClient, error) {
 
 func getActiveBinancePairs() []string {
 	return []string{
+		BinancePairWBTCETH,
 		BinancePairLTCBTC,
 		BinancePairBTCUSDT,
 		BinancePairBTCUSDC,
