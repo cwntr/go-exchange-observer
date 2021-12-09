@@ -110,7 +110,7 @@ func GetWhiteBitPrices() ([]PricePair, []Currency, error) {
 		return p, c, err
 	}
 
-	askETHUSD, err := decimal.NewFromString(wbTicker.Result.ETHUSD.Ticker.Ask)
+	askETHUSD, err := decimal.NewFromString(wbTicker.Result.ETHUSDC.Ticker.Ask)
 	if err != nil {
 		fmt.Printf("err decimal.NewFromString: %v", err)
 		return p, c, err
