@@ -11,6 +11,7 @@ const (
 	WhiteBiTickerRoute  = "/api/v1/public/tickers"
 	WhiteBitPairXSNUSDT = "XSN_USDT"
 	WhiteBitPairBTCUSDT = "BTC_USDT"
+	WhiteBitPairETHUSDT = "ETH_USDT"
 )
 
 type WhitebitClient struct {

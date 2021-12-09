@@ -55,7 +55,8 @@ var O Observer
 type Observer struct {
 	*BinanceClient
 	*WhitebitClient
-	Ticker time.Duration
+	Ticker      time.Duration
+	WithBinance bool
 }
 
 type PricePair struct {
@@ -72,19 +73,71 @@ type Currency struct {
 	PriceBTC float64
 }
 
-func InitClients(binanceKey string, binanceSecret string) (err error) {
+func InitClients(withBinance bool, binanceKey string, binanceSecret string) (err error) {
 	o := Observer{}
-	o.BinanceClient, err = NewBinanceClient(binanceKey, binanceSecret)
-	if err != nil {
-		fmt.Printf("err while initializing o.BinanceClient: %v", err)
-		return err
+	o.WithBinance = withBinance
+	if withBinance {
+		o.BinanceClient, err = NewBinanceClient(binanceKey, binanceSecret)
+		if err != nil {
+			fmt.Printf("err while initializing o.BinanceClient: %v", err)
+			return err
+		}
 	}
 	o.WhitebitClient = NewWhitebitClient(WhiteBitHost)
 	O = o
 	return nil
 }
 
+func GetWhiteBitPrices() ([]PricePair, []Currency, error) {
+	var p []PricePair
+	var c []Currency
+
+	wbTicker, err := O.WhitebitClient.GetTicker()
+	if err != nil {
+		fmt.Printf("err while O.WhitebitClient.GetTicker(): %v", err)
+		return p, c, err
+	}
+
+	askXSNUSDT, err := decimal.NewFromString(wbTicker.Result.XSNUSDT.Ticker.Ask)
+	if err != nil {
+		fmt.Printf("err decimal.NewFromString: %v", err)
+		return p, c, err
+	}
+
+	askBTCUSDT, err := decimal.NewFromString(wbTicker.Result.BTCUSDT.Ticker.Ask)
+	if err != nil {
+		fmt.Printf("err decimal.NewFromString: %v", err)
+		return p, c, err
+	}
+
+	askETHUSD, err := decimal.NewFromString(wbTicker.Result.ETHUSD.Ticker.Ask)
+	if err != nil {
+		fmt.Printf("err decimal.NewFromString: %v", err)
+		return p, c, err
+	}
+
+	askLTCUSD, err := decimal.NewFromString(wbTicker.Result.LTCUSD.Ticker.Ask)
+	if err != nil {
+		fmt.Printf("err decimal.NewFromString: %v", err)
+		return p, c, err
+	}
+
+	BTCinUSD, _ := askBTCUSDT.Float64()
+	XSNinUSD, _ := askXSNUSDT.Float64()
+	ETHinUSD, _ := askETHUSD.Float64()
+	LTCinUSD, _ := askLTCUSD.Float64()
+
+	c = append(c, Currency{Symbol: CurrencyBTC, PriceUSD: BTCinUSD, PriceBTC: float64(0)})
+	c = append(c, Currency{Symbol: CurrencyETH, PriceUSD: ETHinUSD, PriceBTC: float64(0)})
+	c = append(c, Currency{Symbol: CurrencyLTC, PriceUSD: LTCinUSD, PriceBTC: float64(0)})
+	c = append(c, Currency{Symbol: CurrencyXSN, PriceUSD: XSNinUSD, PriceBTC: float64(0)})
+	return p, c, nil
+}
+
 func GetPrices() ([]PricePair, []Currency, error) {
+	if !O.WithBinance {
+		return GetWhiteBitPrices()
+	}
 	var p []PricePair
 	var c []Currency
 
